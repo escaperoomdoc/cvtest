@@ -44,8 +44,9 @@ def go_webcam():
     while True:
         ret, frame = webcam.read()
         if ret:
-            canny = cv2.Canny(frame, webcam_canny_threshold1, webcam_canny_threshold2)
-            cv2.imshow(wnd_name, canny)
+            # filter = cv2.Canny(frame, webcam_canny_threshold1, webcam_canny_threshold2)
+            filter = cv2.blur(frame,(webcam_canny_threshold1//10,webcam_canny_threshold2//10))
+            cv2.imshow(wnd_name, filter)
             key = cv2.waitKey(1)
             if key == ord('q'):
                 break

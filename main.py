@@ -27,7 +27,7 @@ def go_canny(img_name):
 
 def go_filter_1(img_name):
     img = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
-    kernel = np.ones((5,5),np.float32)/125
+    kernel = np.ones((5,5),np.float32)/25
     print(kernel)
     dst = cv2.filter2D(img,-1,kernel)
     cv2.imshow('go_filter_1', dst)

@@ -33,6 +33,21 @@ def go_filter_1(img_name):
     cv2.imshow('go_filter_1', dst)
     cv2.waitKey(0)
 
+def go_webcam():
+    webcam = cv2.VideoCapture(0)
+    while True:
+        ret, frame = webcam.read()
+        if ret:
+            canny = cv2.Canny(frame,100,200)
+            cv2.imshow("tag", canny)
+            key = cv2.waitKey(1)
+            if key == ord('q'):
+                break
+    webcam.release()
+
+
 # go_blur('./temp/pic_1.jpeg')
 # go_canny('./temp/pic_rzd_1.png')
-go_filter_1('./temp/pic_rzd_1.png')
+# go_filter_1('./temp/pic_rzd_1.png')
+go_webcam()
+

@@ -12,6 +12,9 @@ import numpy as np
 
 import cv2
 
+wnd_name = 'cvtest_wnd_1'
+cv2.namedWindow(wnd_name, cv2.WINDOW_AUTOSIZE)
+
 def go_blur(img_name):
     img = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
     blur = cv2.blur(img,(5,5))
@@ -33,18 +36,33 @@ def go_filter_1(img_name):
     cv2.imshow('go_filter_1', dst)
     cv2.waitKey(0)
 
+webcam_canny_threshold1 = 100
+webcam_canny_threshold2 = 200
+
 def go_webcam():
     webcam = cv2.VideoCapture(0)
     while True:
         ret, frame = webcam.read()
         if ret:
-            canny = cv2.Canny(frame,100,200)
-            cv2.imshow("tag", canny)
+            canny = cv2.Canny(frame, webcam_canny_threshold1, webcam_canny_threshold2)
+            cv2.imshow(wnd_name, canny)
             key = cv2.waitKey(1)
             if key == ord('q'):
                 break
     webcam.release()
 
+def callback_function1(*args):
+    global webcam_canny_threshold1
+    webcam_canny_threshold1 = args[0]
+    pass
+
+def callback_function2(*args):
+    global webcam_canny_threshold2
+    webcam_canny_threshold2 = args[0]
+    pass
+
+cv2.createTrackbar('contours1', wnd_name, 100, 500, callback_function1)
+cv2.createTrackbar('contours2', wnd_name, 200, 500, callback_function2)
 
 # go_blur('./temp/pic_1.jpeg')
 # go_canny('./temp/pic_rzd_1.png')

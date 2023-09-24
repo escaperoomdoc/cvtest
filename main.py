@@ -12,61 +12,48 @@ import numpy as np
 
 import cv2
 
+img = cv2.imread('./temp/apk_niias_pts.png')
+#img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+print(img.shape)
+
+w = img.shape[1]
+h = img.shape[0]
+output_pts = np.float32([[0, 0], [w - 1, 0], [w - 1, h - 1], [0, h - 1]])
+
+pt_A = (202,719)
+pt_B = (562,400)
+pt_C = (733,400)
+pt_D = (1238,719)
+input_pts = np.float32([pt_B, pt_C, pt_D, pt_A])
+M = cv2.getPerspectiveTransform(input_pts,output_pts)
+
+
 wnd_name = 'cvtest_wnd_1'
 cv2.namedWindow(wnd_name, cv2.WINDOW_AUTOSIZE)
+stream = cv2.VideoCapture('./temp/apk_niias.mp4')
+time.sleep(1)
+frame_width = int(stream.get(3))
+frame_height = int(stream.get(4))
+video_writer = cv2.VideoWriter('./temp/apk_niias_backperspective.mp4', 
+                         cv2.VideoWriter_fourcc(*'XVID'), 10, (frame_width,frame_height))
 
-def go_blur(img_name):
-    img = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
-    blur = cv2.blur(img,(5,5))
-    cv2.imshow('blur', blur)
-    cv2.waitKey(0)
+counter = 0
+while True:
+    ret, frame = stream.read()
+    if ret:
+        counter += 1
+        #print(frame.shape)
+        #filter = cv2.blur(frame,(5,5))
+        filtered = cv2.warpPerspective(frame, M,(w, h),flags=cv2.INTER_LINEAR)
+        video_writer.write(filtered)
+        cv2.imshow(wnd_name, filtered)
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            break
+        if counter >= 1000:
+            break
+    else:
+        break
 
-
-def go_canny(img_name):
-    img = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
-    canny = cv2.Canny(img,100,400)
-    cv2.imshow('canny', canny)
-    cv2.waitKey(0)
-
-def go_filter_1(img_name):
-    img = cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)
-    kernel = np.ones((5,5),np.float32)/25
-    print(kernel)
-    dst = cv2.filter2D(img,-1,kernel)
-    cv2.imshow('go_filter_1', dst)
-    cv2.waitKey(0)
-
-webcam_canny_threshold1 = 100
-webcam_canny_threshold2 = 200
-
-def go_webcam():
-    webcam = cv2.VideoCapture(0)
-    while True:
-        ret, frame = webcam.read()
-        if ret:
-            # filter = cv2.Canny(frame, webcam_canny_threshold1, webcam_canny_threshold2)
-            filter = cv2.blur(frame,(webcam_canny_threshold1//10,webcam_canny_threshold2//10))
-            cv2.imshow(wnd_name, filter)
-            key = cv2.waitKey(1)
-            if key == ord('q'):
-                break
-    webcam.release()
-
-def callback_function1(*args):
-    global webcam_canny_threshold1
-    webcam_canny_threshold1 = args[0]
-    pass
-
-def callback_function2(*args):
-    global webcam_canny_threshold2
-    webcam_canny_threshold2 = args[0]
-    pass
-
-cv2.createTrackbar('contours1', wnd_name, 100, 500, callback_function1)
-cv2.createTrackbar('contours2', wnd_name, 200, 500, callback_function2)
-
-# go_blur('./temp/pic_1.jpeg')
-# go_canny('./temp/pic_rzd_1.png')
-# go_filter_1('./temp/pic_rzd_1.png')
-go_webcam()
-
+stream.release()
+video_writer.release()

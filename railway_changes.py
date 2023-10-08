@@ -36,7 +36,11 @@ for i in range(len(sections)):
     zones.append({
         'trap': [s[0][0], s[1][0], s[1][1], s[0][1]],
         'rect': [[x,y], [w, h]],
-        'image': None
+        'image': None,
+        'stat': {
+            'err': 0.0,
+            'mse': 0.0
+        }
     })
 
 
@@ -54,11 +58,9 @@ while True:
     ret, frame = stream.read()
     if ret:
         counter += 1
-        if counter < 130:
-            continue
-        time.sleep(0.1)
-        crop_img = frame[y:y+h, x:x+w]
-        #cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+        #if counter < 130:
+        #    continue
+        time.sleep(0.05)
         '''
         for zone in zones:
             trap = zone['trap']
@@ -74,8 +76,25 @@ while True:
             prev_img = zone['image']
             img = frame[y:y+h, x:x+w]
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            cv2.rectangle(frame, (x, y), (x+w,y+h), (0,0,255), 2)
-        cv2.imshow(wnd_name, img)
+            if prev_img is not None:
+                h, w = img.shape
+                diff = cv2.subtract(prev_img, img)
+                err = np.sum(diff**2)
+                mse = err/(float(h*w))
+                zone['stat']['err'] = err
+                zone['stat']['mse'] = int(mse * 10) / 10
+            zone['image'] = img
+            blue = int(min(zone["stat"]["mse"] / 30, 1) * 255)
+            cv2.rectangle(frame, (x, y), (x+w,y+h), (blue,0,0), 2)
+            cv2.putText(frame, 
+                        f'{zone["stat"]["mse"]}', 
+                        (x+w//2, y+h//2),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 255, 0),
+                        1,
+                        cv2.LINE_AA)
+        cv2.imshow(wnd_name, frame)
         
     else:
         break

@@ -105,14 +105,3 @@ while True:
 
 stream.release()
 exit(0)
-
-img = cv2.imread('./temp/apk_niias_pts.png', cv2.IMREAD_GRAYSCALE)
-x = 100
-y = 200
-w = 300
-h = 400
-crop_img = img[y:y+h, x:x+w]
-print(img.shape, crop_img.shape)
-#cv2.imshow(wnd_name, img)
-cv2.imshow(wnd_name, crop_img)
-key = cv2.waitKey(0)

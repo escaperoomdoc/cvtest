@@ -69,6 +69,7 @@ while True:
             cv2.line(frame, trap[2], trap[3], (0,255,0), 2)
             cv2.line(frame, trap[3], trap[0], (0,255,0), 2)
         '''
+        frame = cv2.blur(frame, (3,3))
         for zone in zones:
             rect = zone['rect']
             x, y = rect[0]
